@@ -79,4 +79,30 @@ class PRIDNet(nn.Module):
 
   def forward(self, x):
     out = self.unet(x)
+
     # Kernel Selection
+    # 1. Extract bottleneck features from the encoder (modify if needed)
+    bottleneck = out  # Assuming bottleneck features are at the end of the encoder
+
+    # 2. Apply Kernel Selecting Module
+    kernels = self.ksm(bottleneck)  # Get weights for each kernel
+
+    # 3. Expand kernels (assuming kernels are defined elsewhere)
+    expanded_kernels = []  # Placeholder for expanded kernels
+    for i in range(len(kernels[0])):  # Iterate through kernel weights
+      # Assuming you have pre-defined kernels (kernel1, kernel2, ...)
+      # Expand the weights from a 1x1 kernel to match the actual kernel size
+      expanded_kernels.append(nn.functional.conv2d(kernel[i].unsqueeze(1), weight=torch.ones(1, 1, *kernel_size).cuda()))
+
+    # 4. Apply weighted kernels (replace with your desired operation)
+    weighted_features = torch.zeros_like(out)  # Placeholder for weighted features
+    for i in range(len(expanded_kernels)):
+      weighted_features += kernels[:, i, 0, 0].unsqueeze(1) * nn.functional.conv2d(out, expanded_kernels[i])
+
+    # 5. Combine with original features (replace with your desired operation)
+    out = self.cam(weighted_features + out)  # Apply CAM and combine
+
+    # Rest of the decoder (same as before)
+    # ... your decoder architecture here ...
+
+    return out
