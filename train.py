@@ -64,6 +64,8 @@ val_loader = DataLoader(val_data, batch_size=4)
 criterion = nn.MSELoss()
 optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
 
+print("loaded data and model")
+
 # Training loop
 for epoch in range(epochs):
   model.train()
